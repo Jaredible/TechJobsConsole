@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 
 namespace TechJobsConsole
@@ -13,7 +12,7 @@ namespace TechJobsConsole
         public static List<Dictionary<string, string>> FindAll()
         {
             LoadData();
-            return AllJobs;
+            return new List<Dictionary<string, string>>(AllJobs);
         }
 
         /*
@@ -47,11 +46,34 @@ namespace TechJobsConsole
 
             foreach (Dictionary<string, string> row in AllJobs)
             {
-                string aValue = row[column];
+                string aValue = row[column].ToLower();
 
-                if (aValue.Contains(value))
+                if (aValue.Contains(value.ToLower()))
                 {
                     jobs.Add(row);
+                }
+            }
+
+            return jobs;
+        }
+
+        public static List<Dictionary<string, string>> FindByValue(string value)
+        {
+            // load data, if not already loaded
+            LoadData();
+
+            List<Dictionary<string, string>> jobs = new List<Dictionary<string, string>>();
+
+            foreach (Dictionary<string, string> row in AllJobs)
+            {
+                foreach (string column in row.Keys)
+                {
+                    string aValue = row[column].ToLower();
+
+                    if (!jobs.Contains(row) && aValue.Contains(value.ToLower()))
+                    {
+                        jobs.Add(row);
+                    }
                 }
             }
 
@@ -98,6 +120,14 @@ namespace TechJobsConsole
                 }
                 AllJobs.Add(rowDict);
             }
+
+            // Sort rows by entry's dictionary name key
+            AllJobs.Sort(
+                delegate (Dictionary<string, string> pair1, Dictionary<string, string> pair2)
+                {
+                    return pair1["name"].CompareTo(pair2["name"]);
+                }
+            );
 
             IsDataLoaded = true;
         }
